@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Profit & Loss — PharmaCare{% endblock %}
+{% block page_title %}Profit & Loss Report{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h2>Profit & Loss Report</h2><p>Revenue, cost, and profit by medicine</p></div>
+  <a href="{{ url_for('reports') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Back</a>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+  {% set total_cost   = data | sum(attribute='cost') %}
+  {% set total_profit = data | sum(attribute='profit') %}
+  <div class="col-md-4">
+    <div class="stat-card bg-cyan-grad">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="stat-value">₹{{ "%.0f"|format(total_revenue) }}</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+        <i class="fas fa-rupee-sign stat-icon"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card bg-warning-grad">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="stat-value">₹{{ "%.0f"|format(total_cost) }}</div>
+          <div class="stat-label">Total Cost</div>
+        </div>
+        <i class="fas fa-shopping-bag stat-icon"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card {{ 'bg-success-grad' if total_profit >= 0 else 'bg-danger-grad' }}">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="stat-value">₹{{ "%.0f"|format(total_profit) }}</div>
+          <div class="stat-label">Net Profit</div>
+        </div>
+        <i class="fas fa-chart-line stat-icon"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Medicine Name</th>
+          <th class="text-center">Qty Sold</th>
+          <th class="text-end">Revenue (₹)</th>
+          <th class="text-end">Cost (₹)</th>
+          <th class="text-end">Profit (₹)</th>
+          <th class="text-end">Margin %</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in data %}
+        {% set margin = ((row.profit / row.revenue) * 100) if row.revenue else 0 %}
+        <tr>
+          <td class="text-muted">{{ loop.index }}</td>
+          <td><strong>{{ row.name }}</strong></td>
+          <td class="text-center">{{ row.qty_sold }}</td>
+          <td class="text-end">₹{{ "%.2f"|format(row.revenue) }}</td>
+          <td class="text-end text-muted">₹{{ "%.2f"|format(row.cost) }}</td>
+          <td class="text-end">
+            <span class="{{ 'text-success fw-bold' if row.profit >= 0 else 'text-danger fw-bold' }}">
+              ₹{{ "%.2f"|format(row.profit) }}
+            </span>
+          </td>
+          <td class="text-end">
+            <span class="badge {{ 'bg-success' if margin >= 20 else ('bg-warning text-dark' if margin >= 10 else 'bg-danger') }}">
+              {{ "%.1f"|format(margin) }}%
+            </span>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-5">No sales data available</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      {% if data %}
+      <tfoot class="table-light fw-bold">
+        <tr>
+          <td colspan="3">TOTAL</td>
+          <td class="text-end">₹{{ "%.2f"|format(total_revenue) }}</td>
+          <td class="text-end">₹{{ "%.2f"|format(total_cost) }}</td>
+          <td class="text-end {{ 'text-success' if total_profit >= 0 else 'text-danger' }}">
+            ₹{{ "%.2f"|format(total_profit) }}
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
+      {% endif %}
+    </table>
+  </div>
+</div>
+{% endblock %}

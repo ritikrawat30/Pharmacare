@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — PharmaCare</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+body {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0e7490 100%);
+  font-family: 'DM Sans', sans-serif;
+}
+.login-card {
+  width: 420px; background: #fff; border-radius: 20px;
+  padding: 44px 40px; box-shadow: 0 25px 60px rgba(0,0,0,.3);
+}
+.brand { text-align: center; margin-bottom: 32px; }
+.brand h1 {
+  font-family: 'Space Grotesk', sans-serif; font-size: 2rem;
+  font-weight: 700; color: #0f172a; letter-spacing: -1px;
+}
+.brand h1 span { color: #0891b2; }
+.brand p { color: #64748b; font-size: .85rem; margin: 0; }
+.form-label { font-weight: 600; font-size: .78rem; color: #64748b; text-transform: uppercase; letter-spacing: .5px; }
+.form-control {
+  border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 16px;
+  font-size: .9rem; transition: border-color .2s;
+}
+.form-control:focus { border-color: #0891b2; box-shadow: 0 0 0 3px rgba(8,145,178,.12); }
+.btn-login {
+  width: 100%; padding: 13px; background: linear-gradient(135deg,#2563eb,#0891b2);
+  border: none; border-radius: 10px; color: #fff; font-weight: 700;
+  font-size: .95rem; cursor: pointer; transition: opacity .2s;
+}
+.btn-login:hover { opacity: .9; }
+.alert { border-radius: 10px; border: none; font-size: .85rem; }
+.divider { text-align: center; color: #94a3b8; font-size: .8rem; margin: 20px 0; position: relative; }
+.divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e2e8f0; }
+.divider span { background: #fff; padding: 0 12px; position: relative; }
+</style>
+</head>
+<body>
+<div class="login-card">
+  <div class="brand">
+    <h1><i class="fas fa-pills me-2"></i>Pharma<span>Care</span></h1>
+    <p>Medical Store Management System</p>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="alert alert-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <form method="POST">
+    <div class="mb-3">
+      <label class="form-label">Username</label>
+      <div class="input-group">
+        <span class="input-group-text" style="border-radius:10px 0 0 10px;border:1.5px solid #e2e8f0;border-right:0;background:#f8fafc">
+          <i class="fas fa-user text-secondary"></i>
+        </span>
+        <input type="text" name="username" class="form-control" placeholder="Enter username" required
+               style="border-radius:0 10px 10px 0;border-left:0">
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="form-label">Password</label>
+      <div class="input-group">
+        <span class="input-group-text" style="border-radius:10px 0 0 10px;border:1.5px solid #e2e8f0;border-right:0;background:#f8fafc">
+          <i class="fas fa-lock text-secondary"></i>
+        </span>
+        <input type="password" name="password" class="form-control" placeholder="Enter password" required
+               style="border-radius:0 10px 10px 0;border-left:0">
+      </div>
+    </div>
+    <button type="submit" class="btn-login">
+      <i class="fas fa-sign-in-alt me-2"></i>Login
+    </button>
+  </form>
+  <div class="divider"><span>or</span></div>
+  <div class="text-center">
+    <a href="{{ url_for('register') }}" style="color:#0891b2;font-size:.85rem;font-weight:600;text-decoration:none">
+      <i class="fas fa-user-plus me-1"></i> Create new account
+    </a>
+  </div>
+  <div class="text-center mt-4" style="font-size:.75rem;color:#94a3b8">
+    Default: admin / admin123
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}PharmaCare{% endblock %}</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0d6efd;
+  --primary-dark: #0a58ca;
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #94a3b8;
+  --sidebar-active: #1e40af;
+  --accent: #06b6d4;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --card-bg: #ffffff;
+  --body-bg: #f1f5f9;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--body-bg); color: var(--text); }
+
+/* ── Sidebar ── */
+.sidebar {
+  position: fixed; top: 0; left: 0; height: 100vh; width: 250px;
+  background: var(--sidebar-bg); z-index: 100; overflow-y: auto;
+  transition: transform .3s ease;
+}
+.sidebar-brand {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.sidebar-brand h4 {
+  color: #fff; font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.3rem; font-weight: 700; letter-spacing: -.5px;
+}
+.sidebar-brand small { color: var(--accent); font-size: .7rem; letter-spacing: 2px; text-transform: uppercase; }
+.sidebar-nav { padding: 12px 0; }
+.nav-section { padding: 12px 20px 4px; font-size: .65rem; letter-spacing: 2px; text-transform: uppercase; color: #475569; }
+.sidebar a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px; color: var(--sidebar-text);
+  text-decoration: none; font-size: .875rem; font-weight: 500;
+  border-left: 3px solid transparent; transition: all .2s;
+}
+.sidebar a:hover { color: #fff; background: rgba(255,255,255,.05); }
+.sidebar a.active { color: #fff; background: rgba(29,78,216,.3); border-left-color: var(--accent); }
+.sidebar a i { width: 18px; text-align: center; }
+
+/* ── Topbar ── */
+.topbar {
+  position: fixed; top: 0; left: 250px; right: 0; height: 60px;
+  background: #fff; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; z-index: 99; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.topbar-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 1rem; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.user-pill {
+  background: var(--primary); color: #fff; border-radius: 20px;
+  padding: 4px 14px; font-size: .8rem; font-weight: 600;
+}
+.role-badge {
+  background: #e0f2fe; color: #0369a1; border-radius: 4px;
+  padding: 2px 8px; font-size: .7rem; font-weight: 600; text-transform: uppercase;
+}
+
+/* ── Main ── */
+.main { margin-left: 250px; padding-top: 60px; min-height: 100vh; }
+.content { padding: 28px 28px; }
+
+/* ── Cards ── */
+.card { border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.card-header { background: #fff; border-bottom: 1px solid var(--border); border-radius: 12px 12px 0 0 !important; padding: 16px 20px; }
+.stat-card { border-radius: 12px; padding: 20px; color: #fff; }
+.stat-card .stat-icon { font-size: 2rem; opacity: .8; }
+.stat-card .stat-value { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+.stat-card .stat-label { font-size: .8rem; opacity: .85; margin-top: 4px; }
+.bg-primary-grad { background: linear-gradient(135deg,#2563eb,#1d4ed8); }
+.bg-success-grad  { background: linear-gradient(135deg,#16a34a,#15803d); }
+.bg-warning-grad  { background: linear-gradient(135deg,#d97706,#b45309); }
+.bg-danger-grad   { background: linear-gradient(135deg,#dc2626,#b91c1c); }
+.bg-cyan-grad     { background: linear-gradient(135deg,#0891b2,#0e7490); }
+.bg-purple-grad   { background: linear-gradient(135deg,#7c3aed,#6d28d9); }
+.bg-pink-grad     { background: linear-gradient(135deg,#db2777,#be185d); }
+.bg-teal-grad     { background: linear-gradient(135deg,#0d9488,#0f766e); }
+
+/* ── Tables ── */
+.table th { font-size: .75rem; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: var(--text-muted); }
+.table td { vertical-align: middle; font-size: .875rem; }
+.badge-stock { font-size: .7rem; padding: 4px 8px; border-radius: 6px; font-weight: 600; }
+
+/* ── Alerts ── */
+.alert { border-radius: 10px; border: none; font-size: .875rem; }
+
+/* ── Forms ── */
+.form-label { font-weight: 600; font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.form-control, .form-select { border-radius: 8px; border: 1.5px solid var(--border); font-size: .875rem; padding: 10px 14px; }
+.form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,110,253,.12); }
+
+/* ── Buttons ── */
+.btn { border-radius: 8px; font-weight: 600; font-size: .875rem; padding: 8px 18px; }
+.btn-primary { background: var(--primary); border-color: var(--primary); }
+.btn-sm { padding: 4px 12px; font-size: .8rem; }
+
+/* ── Page header ── */
+.page-header { margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
+.page-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; }
+.page-header p { color: var(--text-muted); font-size: .85rem; margin: 0; }
+
+/* ── Alerts float ── */
+.flash-container { position: fixed; top: 70px; right: 20px; z-index: 9999; width: 320px; }
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if session.user_id %}
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <h4><i class="fas fa-pills me-2" style="color:var(--accent)"></i>PharmaCare</h4>
+    <small>Management System</small>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint=='dashboard' }}">
+      <i class="fas fa-home"></i> Dashboard
+    </a>
+
+    <div class="nav-section">Inventory</div>
+    <a href="{{ url_for('medicines') }}" class="{{ 'active' if 'medicine' in request.endpoint }}">
+      <i class="fas fa-capsules"></i> Medicines
+    </a>
+
+    <div class="nav-section">Transactions</div>
+    <a href="{{ url_for('billing') }}" class="{{ 'active' if request.endpoint=='billing' }}">
+      <i class="fas fa-receipt"></i> New Bill
+    </a>
+    <a href="{{ url_for('sales') }}" class="{{ 'active' if request.endpoint=='sales' }}">
+      <i class="fas fa-history"></i> Sales History
+    </a>
+
+    <div class="nav-section">Contacts</div>
+    <a href="{{ url_for('customers') }}" class="{{ 'active' if 'customer' in request.endpoint }}">
+      <i class="fas fa-users"></i> Customers
+    </a>
+    <a href="{{ url_for('suppliers') }}" class="{{ 'active' if 'supplier' in request.endpoint }}">
+      <i class="fas fa-truck"></i> Suppliers
+    </a>
+
+    <div class="nav-section">Analytics</div>
+    <a href="{{ url_for('reports') }}" class="{{ 'active' if 'report' in request.endpoint }}">
+      <i class="fas fa-chart-bar"></i> Reports
+    </a>
+
+    {% if session.role == 'admin' %}
+    <div class="nav-section">Admin</div>
+    <a href="{{ url_for('users') }}" class="{{ 'active' if request.endpoint=='users' }}">
+      <i class="fas fa-user-cog"></i> Users
+    </a>
+    {% endif %}
+
+    <div class="nav-section">Account</div>
+    <a href="{{ url_for('logout') }}">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</nav>
+
+<!-- Topbar -->
+<div class="topbar">
+  <span class="topbar-title">{% block page_title %}PharmaCare{% endblock %}</span>
+  <div class="topbar-right">
+    <span class="role-badge">{{ session.role }}</span>
+    <span class="user-pill"><i class="fas fa-user me-1"></i>{{ session.name }}</span>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<div class="flash-container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="alert alert-{{ cat }} alert-dismissible fade show shadow-sm" role="alert">
+      {{ msg }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+<div class="main">
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+{% else %}
+{% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+<script>
+setTimeout(() => {
+  document.querySelectorAll('.flash-container .alert').forEach(a => {
+    new bootstrap.Alert(a).close();
+  });
+}, 4000);
+</script>
+</body>
+</html>

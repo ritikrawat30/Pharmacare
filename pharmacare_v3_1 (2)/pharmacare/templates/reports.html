@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Reports — PharmaCare{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h2>Reports</h2><p>Generate business and inventory reports</p></div>
+</div>
+<div class="row g-4">
+  <div class="col-md-3 col-6">
+    <a href="{{ url_for('report_stock') }}" class="text-decoration-none">
+      <div class="card text-center p-4 h-100 border-0 shadow-sm" style="border-radius:14px;transition:transform .2s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <i class="fas fa-boxes fa-2x mb-3 text-primary"></i>
+        <h6 class="fw-bold">Stock Report</h6>
+        <p class="text-muted small mb-0">Current medicine inventory levels</p>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3 col-6">
+    <a href="{{ url_for('report_sales') }}" class="text-decoration-none">
+      <div class="card text-center p-4 h-100 border-0 shadow-sm" style="border-radius:14px;transition:transform .2s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <i class="fas fa-chart-bar fa-2x mb-3 text-success"></i>
+        <h6 class="fw-bold">Sales Report</h6>
+        <p class="text-muted small mb-0">Daily, weekly & monthly sales</p>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3 col-6">
+    <a href="{{ url_for('report_expired') }}" class="text-decoration-none">
+      <div class="card text-center p-4 h-100 border-0 shadow-sm" style="border-radius:14px;transition:transform .2s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <i class="fas fa-calendar-times fa-2x mb-3 text-danger"></i>
+        <h6 class="fw-bold">Expiry Report</h6>
+        <p class="text-muted small mb-0">Expired & near-expiry medicines</p>
+      </div>
+    </a>
+  </div>
+  {% if session.role == 'admin' %}
+  <div class="col-md-3 col-6">
+    <a href="{{ url_for('report_profit') }}" class="text-decoration-none">
+      <div class="card text-center p-4 h-100 border-0 shadow-sm" style="border-radius:14px;transition:transform .2s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <i class="fas fa-rupee-sign fa-2x mb-3 text-warning"></i>
+        <h6 class="fw-bold">Profit & Loss</h6>
+        <p class="text-muted small mb-0">Revenue and profit analysis</p>
+      </div>
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

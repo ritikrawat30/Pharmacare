@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Medicines — PharmaCare{% endblock %}
+{% block page_title %}Medicine Inventory{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Medicine Inventory</h2>
+    <p>Manage your medicine stock and details</p>
+  </div>
+  {% if session.role in ['admin','pharmacist'] %}
+  <a href="{{ url_for('add_medicine') }}" class="btn btn-primary">
+    <i class="fas fa-plus me-2"></i>Add Medicine
+  </a>
+  {% endif %}
+</div>
+
+<!-- Search -->
+<div class="card mb-4">
+  <div class="card-body py-3">
+    <form method="GET" class="d-flex gap-3">
+      <input type="text" name="search" class="form-control" placeholder="Search by name, generic name, or category..." value="{{ search }}">
+      <button type="submit" class="btn btn-primary px-4"><i class="fas fa-search me-1"></i>Search</button>
+      {% if search %}<a href="{{ url_for('medicines') }}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Medicine Name</th>
+          <th>Category</th>
+          <th>Stock</th>
+          <th>Purchase ₹</th>
+          <th>Selling ₹</th>
+          <th>Expiry</th>
+          <th>Status</th>
+          {% if session.role in ['admin','pharmacist'] %}<th>Actions</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in medicines %}
+        {% set expired = m.expiry_date < today %}
+        {% set expiring = m.expiry_date <= soon and not expired %}
+        <tr class="{{ 'table-danger' if expired else ('table-warning' if expiring else '') }}">
+          <td class="text-muted">{{ loop.index }}</td>
+          <td>
+            <strong>{{ m.name }}</strong>
+            {% if m.generic_name %}<br><small class="text-muted">{{ m.generic_name }}</small>{% endif %}
+          </td>
+          <td><span class="badge bg-light text-dark border">{{ m.category or '—' }}</span></td>
+          <td>
+            <span class="badge-stock {{ 'bg-danger text-white' if m.stock_quantity <= 0 else ('bg-warning text-dark' if m.stock_quantity <= m.reorder_level else 'bg-success text-white') }}">
+              {{ m.stock_quantity }} {{ m.unit }}
+            </span>
+          </td>
+          <td>₹{{ "%.2f"|format(m.purchase_price) }}</td>
+          <td>₹{{ "%.2f"|format(m.selling_price) }}</td>
+          <td>
+            {{ m.expiry_date[:10] if m.expiry_date else '—' }}
+          </td>
+          <td>
+            {% if expired %}
+              <span class="badge bg-danger">Expired</span>
+            {% elif expiring %}
+              <span class="badge bg-warning text-dark">Expiring Soon</span>
+            {% elif m.stock_quantity <= 0 %}
+              <span class="badge bg-secondary">Out of Stock</span>
+            {% elif m.stock_quantity <= m.reorder_level %}
+              <span class="badge bg-orange" style="background:#f97316!important;color:#fff">Low Stock</span>
+            {% else %}
+              <span class="badge bg-success">In Stock</span>
+            {% endif %}
+          </td>
+          {% if session.role in ['admin','pharmacist'] %}
+          <td>
+            <a href="{{ url_for('edit_medicine', id=m.id) }}" class="btn btn-sm btn-outline-primary me-1">
+              <i class="fas fa-edit"></i>
+            </a>
+            {% if session.role == 'admin' %}
+            <a href="{{ url_for('delete_medicine', id=m.id) }}"
+               class="btn btn-sm btn-outline-danger"
+               onclick="return confirm('Remove this medicine?')">
+              <i class="fas fa-trash"></i>
+            </a>
+            {% endif %}
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="9" class="text-center text-muted py-5">
+          <i class="fas fa-capsules fa-2x mb-2 d-block"></i>No medicines found
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const today = new Date();
+</script>
+{% endblock %}

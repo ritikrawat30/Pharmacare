@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Invoice {{ sale.bill_number }}</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+@media print { .no-print { display: none !important; } body { margin: 0; } }
+body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; }
+.invoice-box { max-width: 800px; margin: 30px auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.1); }
+.invoice-header { background: linear-gradient(135deg, #0f172a, #1e3a5f); color: #fff; padding: 32px 40px; }
+.invoice-header h2 { font-size: 2rem; font-weight: 800; letter-spacing: -1px; }
+.invoice-header .subtitle { color: #94a3b8; font-size: .8rem; letter-spacing: 2px; text-transform: uppercase; }
+.bill-info { padding: 24px 40px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+.invoice-body { padding: 32px 40px; }
+.table th { font-size: .75rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: #64748b; }
+.totals-box { background: #f8fafc; border-radius: 10px; padding: 20px 24px; border: 1px solid #e2e8f0; }
+.totals-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: .9rem; }
+.totals-total { font-size: 1.2rem; font-weight: 800; color: #0f172a; border-top: 2px solid #0f172a; margin-top: 8px; padding-top: 10px; }
+.badge-pay { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: .8rem; font-weight: 700; }
+.footer { background: #f8fafc; padding: 20px 40px; text-align: center; color: #94a3b8; font-size: .8rem; border-top: 1px solid #e2e8f0; }
+</style>
+</head>
+<body>
+<div class="no-print d-flex justify-content-center gap-3 py-3">
+  <a href="{{ url_for('billing') }}" class="btn btn-outline-secondary">
+    <i class="fas fa-plus me-2"></i>New Bill
+  </a>
+  <button class="btn btn-primary" onclick="window.print()">
+    <i class="fas fa-print me-2"></i>Print Invoice
+  </button>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-outline-dark">Dashboard</a>
+</div>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<div class="invoice-box">
+  <div class="invoice-header">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <div class="subtitle">Invoice</div>
+        <h2><i class="fas fa-pills me-2" style="color:#0891b2"></i>PharmaCare</h2>
+        <p style="color:#94a3b8;margin:0;font-size:.85rem">Medical Store Management System</p>
+      </div>
+      <div class="text-end">
+        <div style="color:#94a3b8;font-size:.8rem">Bill Number</div>
+        <div style="font-size:1.1rem;font-weight:700;font-family:monospace">{{ sale.bill_number }}</div>
+        <div style="color:#94a3b8;font-size:.8rem;margin-top:8px">Date</div>
+        <div style="font-weight:600">{{ sale.sale_date[:10] }}</div>
+        <div style="font-size:.85rem;color:#94a3b8">{{ sale.sale_date[11:16] }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bill-info">
+    <div class="row">
+      <div class="col-6">
+        <div style="font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;font-weight:600">Billed To</div>
+        <div style="font-size:1.1rem;font-weight:700;margin-top:4px">
+          {{ sale.customer_name or 'Walk-in Customer' }}
+        </div>
+        {% if sale.customer_phone %}<div style="color:#64748b">📞 {{ sale.customer_phone }}</div>{% endif %}
+        {% if sale.customer_address %}<div style="color:#64748b;font-size:.85rem">{{ sale.customer_address }}</div>{% endif %}
+      </div>
+      <div class="col-6 text-end">
+        <div style="font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;font-weight:600">Cashier</div>
+        <div style="font-size:1rem;font-weight:700;margin-top:4px">{{ sale.cashier or '—' }}</div>
+        <div class="mt-2"><span class="badge-pay">{{ sale.payment_method }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="invoice-body">
+    <table class="table mb-4">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Medicine</th>
+          <th class="text-center">Qty</th>
+          <th class="text-end">Unit Price</th>
+          <th class="text-end">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td class="text-muted">{{ loop.index }}</td>
+          <td>
+            <strong>{{ item.name }}</strong>
+            {% if item.generic_name %}<br><small class="text-muted">{{ item.generic_name }}</small>{% endif %}
+          </td>
+          <td class="text-center">{{ item.quantity }} {{ item.unit }}</td>
+          <td class="text-end">₹{{ "%.2f"|format(item.unit_price) }}</td>
+          <td class="text-end"><strong>₹{{ "%.2f"|format(item.subtotal) }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="row">
+      <div class="col-md-5 ms-auto">
+        <div class="totals-box">
+          <div class="totals-row"><span>Subtotal</span><span>₹{{ "%.2f"|format(sale.subtotal) }}</span></div>
+          <div class="totals-row"><span>Discount</span><span>— ₹{{ "%.2f"|format(sale.discount) }}</span></div>
+          <div class="totals-row"><span>Tax</span><span>+ ₹{{ "%.2f"|format(sale.tax) }}</span></div>
+          <div class="totals-row totals-total"><span>TOTAL</span><span>₹{{ "%.2f"|format(sale.total_amount) }}</span></div>
+        </div>
+      </div>
+    </div>
+
+    {% if sale.notes %}
+    <div class="mt-4 p-3 rounded" style="background:#f0f9ff;border:1px solid #bae6fd">
+      <strong>Notes:</strong> {{ sale.notes }}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="footer">
+    <p>Thank you for your purchase! • PharmaCare Management System</p>
+    <p>This is a computer-generated invoice and does not require a signature.</p>
+  </div>
+</div>
+</body>
+</html>

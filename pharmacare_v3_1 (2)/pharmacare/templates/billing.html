@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% block title %}Billing — PharmaCare{% endblock %}
+{% block page_title %}New Bill{% endblock %}
+
+{% block extra_css %}
+<style>
+.billing-left { background:#fff; border-radius:12px; padding:24px; border:1px solid #e2e8f0; }
+.billing-right { background:#0f172a; border-radius:12px; padding:24px; color:#fff; position:sticky;top:76px; }
+.billing-right h5 { color:#94a3b8; font-size:.75rem;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid #1e293b;padding-bottom:12px;margin-bottom:16px; }
+.cart-item { background:#1e293b; border-radius:8px;padding:10px 14px; margin-bottom:8px; font-size:.85rem; }
+.cart-item .med-name { font-weight:600; color:#e2e8f0; }
+.cart-item .med-detail { color:#64748b; font-size:.78rem; }
+.cart-item .remove-btn { color:#ef4444;cursor:pointer;font-size:.85rem; }
+.total-row { display:flex;justify-content:space-between;padding:6px 0;font-size:.9rem;color:#94a3b8; }
+.total-grand { display:flex;justify-content:space-between;padding:12px 0;font-size:1.2rem;font-weight:700;color:#fff;border-top:1px solid #334155;margin-top:8px; }
+.bill-badge { background:#1e40af;color:#fff;padding:6px 14px;border-radius:20px;font-family:monospace;font-size:.85rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>New Billing</h2>
+    <p>Create a new bill / invoice</p>
+  </div>
+  <div class="bill-badge">{{ bill_number }}</div>
+</div>
+
+<div class="row g-4">
+  <!-- Left: Add items -->
+  <div class="col-md-7">
+    <div class="billing-left mb-4">
+      <h6 class="fw-bold mb-3"><i class="fas fa-user me-2 text-primary"></i>Customer (Optional)</h6>
+      <select id="customer_id" class="form-select">
+        <option value="">Walk-in Customer</option>
+        {% for c in customers %}
+        <option value="{{ c.id }}">{{ c.name }} — {{ c.phone }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="billing-left">
+      <h6 class="fw-bold mb-3"><i class="fas fa-capsules me-2 text-primary"></i>Add Medicine</h6>
+      <div class="row g-3">
+        <div class="col-md-5">
+          <label class="form-label">Select Medicine</label>
+          <select id="med_select" class="form-select" onchange="fillMedDetails()">
+            <option value="">-- Choose Medicine --</option>
+            {% for m in medicines %}
+            <option value="{{ m.id }}"
+              data-price="{{ m.selling_price }}"
+              data-stock="{{ m.stock_quantity }}"
+              data-unit="{{ m.unit }}"
+              data-name="{{ m.name }}">
+              {{ m.name }} ({{ m.stock_quantity }} {{ m.unit }})
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Qty</label>
+          <input type="number" id="med_qty" class="form-control" value="1" min="1" placeholder="Qty">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Unit Price (₹)</label>
+          <input type="number" id="med_price" class="form-control" step="0.01" placeholder="0.00">
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+          <button class="btn btn-primary w-100" onclick="addToCart()" title="Add">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+        <div class="col-12" id="stock_info" style="display:none">
+          <small class="text-muted" id="stock_text"></small>
+        </div>
+      </div>
+
+      <table class="table table-sm mt-4" id="cart_table" style="display:none">
+        <thead class="table-light">
+          <tr><th>Medicine</th><th>Qty</th><th>Price</th><th>Subtotal</th><th></th></tr>
+        </thead>
+        <tbody id="cart_body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Right: Summary -->
+  <div class="col-md-5">
+    <div class="billing-right">
+      <h5>Bill Summary</h5>
+      <div id="cart_empty" class="text-center py-4" style="color:#475569">
+        <i class="fas fa-shopping-cart fa-2x mb-2 d-block"></i>
+        No items added yet
+      </div>
+      <div id="cart_items"></div>
+      <div id="bill_totals" style="display:none">
+        <div class="total-row"><span>Subtotal</span><span id="s_subtotal">₹0.00</span></div>
+        <div class="total-row">
+          <span>Discount (%)</span>
+          <input type="number" id="discount" class="form-control form-control-sm w-25 bg-transparent text-white border-secondary"
+                 value="0" min="0" max="100" onchange="updateTotals()" style="text-align:right">
+        </div>
+        <div class="total-row">
+          <span>Tax (%)</span>
+          <input type="number" id="tax" class="form-control form-control-sm w-25 bg-transparent text-white border-secondary"
+                 value="0" min="0" max="100" onchange="updateTotals()" style="text-align:right">
+        </div>
+        <div class="total-grand"><span>TOTAL</span><span id="s_total">₹0.00</span></div>
+
+        <div class="mt-3">
+          <label class="form-label" style="color:#94a3b8">Payment Method</label>
+          <select id="payment_method" class="form-select bg-transparent text-white border-secondary">
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <option value="UPI">UPI</option>
+            <option value="Credit">Credit</option>
+          </select>
+        </div>
+        <div class="mt-3">
+          <label class="form-label" style="color:#94a3b8">Notes</label>
+          <textarea id="notes" class="form-control bg-transparent text-white border-secondary" rows="2" placeholder="Optional note..."></textarea>
+        </div>
+        <button class="btn btn-success w-100 mt-3 fw-bold" onclick="saveBill()">
+          <i class="fas fa-check-circle me-2"></i>Generate Bill
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const BILL_NUMBER = '{{ bill_number }}';
+let cart = [];
+
+function fillMedDetails() {
+  const sel = document.getElementById('med_select');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt.value) return;
+  document.getElementById('med_price').value = opt.dataset.price;
+  document.getElementById('stock_info').style.display = 'block';
+  document.getElementById('stock_text').textContent =
+    `Available stock: ${opt.dataset.stock} ${opt.dataset.unit}`;
+  document.getElementById('med_qty').max = opt.dataset.stock;
+}
+
+function addToCart() {
+  const sel = document.getElementById('med_select');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt.value) { alert('Please select a medicine'); return; }
+  const qty = parseFloat(document.getElementById('med_qty').value);
+  const price = parseFloat(document.getElementById('med_price').value);
+  if (!qty || qty <= 0) { alert('Enter valid quantity'); return; }
+  if (qty > parseFloat(opt.dataset.stock)) { alert('Insufficient stock'); return; }
+
+  const existing = cart.find(i => i.medicine_id == opt.value);
+  if (existing) {
+    existing.quantity += qty;
+    existing.subtotal = existing.quantity * existing.unit_price;
+  } else {
+    cart.push({
+      medicine_id: opt.value,
+      name: opt.dataset.name,
+      quantity: qty,
+      unit_price: price,
+      subtotal: qty * price,
+      unit: opt.dataset.unit
+    });
+  }
+  renderCart();
+  sel.value = '';
+  document.getElementById('med_qty').value = 1;
+  document.getElementById('med_price').value = '';
+  document.getElementById('stock_info').style.display = 'none';
+}
+
+function removeItem(idx) {
+  cart.splice(idx, 1);
+  renderCart();
+}
+
+function renderCart() {
+  const empty = document.getElementById('cart_empty');
+  const items = document.getElementById('cart_items');
+  const totals = document.getElementById('bill_totals');
+  const table = document.getElementById('cart_table');
+
+  if (cart.length === 0) {
+    empty.style.display = 'block';
+    items.innerHTML = '';
+    totals.style.display = 'none';
+    table.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  totals.style.display = 'block';
+  table.style.display = 'table';
+
+  // Sidebar cart
+  items.innerHTML = cart.map((item, i) => `
+    <div class="cart-item">
+      <div class="d-flex justify-content-between">
+        <span class="med-name">${item.name}</span>
+        <span class="remove-btn" onclick="removeItem(${i})"><i class="fas fa-times"></i></span>
+      </div>
+      <div class="d-flex justify-content-between mt-1">
+        <span class="med-detail">${item.quantity} ${item.unit} × ₹${item.unit_price.toFixed(2)}</span>
+        <span style="color:#38bdf8;font-weight:600">₹${item.subtotal.toFixed(2)}</span>
+      </div>
+    </div>`).join('');
+
+  // Table
+  document.getElementById('cart_body').innerHTML = cart.map((item, i) => `
+    <tr>
+      <td>${item.name}</td>
+      <td>${item.quantity}</td>
+      <td>₹${item.unit_price.toFixed(2)}</td>
+      <td><strong>₹${item.subtotal.toFixed(2)}</strong></td>
+      <td><span class="text-danger" style="cursor:pointer" onclick="removeItem(${i})"><i class="fas fa-trash"></i></span></td>
+    </tr>`).join('');
+
+  updateTotals();
+}
+
+function updateTotals() {
+  const subtotal = cart.reduce((s, i) => s + i.subtotal, 0);
+  const disc = parseFloat(document.getElementById('discount').value) || 0;
+  const taxP = parseFloat(document.getElementById('tax').value) || 0;
+  const discAmt = subtotal * disc / 100;
+  const taxAmt  = (subtotal - discAmt) * taxP / 100;
+  const total   = subtotal - discAmt + taxAmt;
+  document.getElementById('s_subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+  document.getElementById('s_total').textContent    = `₹${total.toFixed(2)}`;
+}
+
+async function saveBill() {
+  if (cart.length === 0) { alert('Add at least one item'); return; }
+  const subtotal = cart.reduce((s, i) => s + i.subtotal, 0);
+  const disc  = parseFloat(document.getElementById('discount').value) || 0;
+  const taxP  = parseFloat(document.getElementById('tax').value) || 0;
+  const discAmt = subtotal * disc / 100;
+  const taxAmt  = (subtotal - discAmt) * taxP / 100;
+  const total   = subtotal - discAmt + taxAmt;
+
+  const payload = {
+    bill_number: BILL_NUMBER,
+    customer_id: document.getElementById('customer_id').value || null,
+    items: cart,
+    subtotal, discount: discAmt, tax: taxAmt, total_amount: total,
+    payment_method: document.getElementById('payment_method').value,
+    notes: document.getElementById('notes').value
+  };
+
+  const res = await fetch('/billing/save', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (data.success) {
+    window.location.href = `/billing/invoice/${data.sale_id}`;
+  } else {
+    alert('Error: ' + data.error);
+  }
+}
+</script>
+{% endblock %}

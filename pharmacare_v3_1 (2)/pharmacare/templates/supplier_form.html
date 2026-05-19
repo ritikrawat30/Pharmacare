@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Supplier{% endblock %}
+{% block page_title %}{{ action }} Supplier{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h2>{{ action }} Supplier</h2></div>
+  <a href="{{ url_for('suppliers') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Back</a>
+</div>
+<div class="card">
+  <div class="card-body p-4">
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Company / Supplier Name *</label>
+          <input type="text" name="name" class="form-control" required value="{{ supplier.name if supplier else '' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Contact Person</label>
+          <input type="text" name="contact_person" class="form-control" value="{{ supplier.contact_person if supplier else '' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Phone</label>
+          <input type="text" name="phone" class="form-control" value="{{ supplier.phone if supplier else '' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" value="{{ supplier.email if supplier else '' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">GST Number</label>
+          <input type="text" name="gst_number" class="form-control" value="{{ supplier.gst_number if supplier else '' }}">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Address</label>
+          <textarea name="address" class="form-control" rows="2">{{ supplier.address if supplier else '' }}</textarea>
+        </div>
+        <div class="col-12 d-flex gap-3">
+          <button type="submit" class="btn btn-primary px-5"><i class="fas fa-save me-2"></i>{{ action }}</button>
+          <a href="{{ url_for('suppliers') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

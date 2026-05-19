@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Medicine — PharmaCare{% endblock %}
+{% block page_title %}{{ action }} Medicine{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>{{ action }} Medicine</h2>
+    <p>{{ 'Add a new medicine to inventory' if action=='Add' else 'Update medicine details' }}</p>
+  </div>
+  <a href="{{ url_for('medicines') }}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>Back
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body p-4">
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Medicine Name *</label>
+          <input type="text" name="name" class="form-control" required
+                 value="{{ medicine.name if medicine else '' }}" placeholder="e.g. Paracetamol 500mg">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Generic Name</label>
+          <input type="text" name="generic_name" class="form-control"
+                 value="{{ medicine.generic_name if medicine else '' }}" placeholder="e.g. Paracetamol">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Category</label>
+          <select name="category" class="form-select">
+            <option value="">-- Select --</option>
+            {% for cat in ['Analgesic','Antibiotic','Antacid','Antidiabetic','Antihistamine','Antiviral',
+                           'Statin','Vitamin','Supplement','Syrup','Injection','Topical','Other'] %}
+            <option value="{{ cat }}" {{ 'selected' if medicine and medicine.category==cat }}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Manufacturer</label>
+          <input type="text" name="manufacturer" class="form-control"
+                 value="{{ medicine.manufacturer if medicine else '' }}" placeholder="Sun Pharma">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Batch Number</label>
+          <input type="text" name="batch_number" class="form-control"
+                 value="{{ medicine.batch_number if medicine else '' }}" placeholder="BAT001">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Barcode (Optional)</label>
+          <input type="text" name="barcode" class="form-control"
+                 value="{{ medicine.barcode if medicine else '' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Stock Quantity *</label>
+          <input type="number" name="stock_quantity" class="form-control" step="0.01" required
+                 value="{{ medicine.stock_quantity if medicine else '0' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Unit *</label>
+          <select name="unit" class="form-select">
+            {% for u in ['tablets','capsules','ml','mg','strips','bottles','vials','sachets','tubes'] %}
+            <option value="{{ u }}" {{ 'selected' if medicine and medicine.unit==u }}>{{ u }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Purchase Price (₹) *</label>
+          <input type="number" name="purchase_price" class="form-control" step="0.01" required
+                 value="{{ medicine.purchase_price if medicine else '' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Selling Price (₹) *</label>
+          <input type="number" name="selling_price" class="form-control" step="0.01" required
+                 value="{{ medicine.selling_price if medicine else '' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Reorder Level</label>
+          <input type="number" name="reorder_level" class="form-control" step="0.01"
+                 value="{{ medicine.reorder_level if medicine else '10' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Manufacture Date</label>
+          <input type="date" name="manufacture_date" class="form-control"
+                 value="{{ medicine.manufacture_date if medicine else '' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Expiry Date *</label>
+          <input type="date" name="expiry_date" class="form-control" required
+                 value="{{ medicine.expiry_date if medicine else '' }}">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Description / Notes</label>
+          <textarea name="description" class="form-control" rows="3"
+                    placeholder="Additional notes...">{{ medicine.description if medicine else '' }}</textarea>
+        </div>
+        <div class="col-12 d-flex gap-3 pt-2">
+          <button type="submit" class="btn btn-primary px-5">
+            <i class="fas fa-save me-2"></i>{{ action }} Medicine
+          </button>
+          <a href="{{ url_for('medicines') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
